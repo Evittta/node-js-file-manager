@@ -11,7 +11,7 @@ printWorkingDirectory();
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 
-rl.setPrompt('Enter your command:');
+rl.setPrompt('Enter your command: ');
 rl.prompt();
 
 rl.on('line', async line => {
@@ -24,68 +24,57 @@ rl.on('line', async line => {
   }
 
   try {
-    const [ command, ...args ] = input.split(' ');
-    const [ firstArg, secondArg ] = args;
+    const [ command, ...params ] = input.split(' ');
+    const [ firstArg, secondArg ] = params;
 
-    switch (command) {
-      case 'up':
-        Navigation.up()
-        break;
+    const commandMap = new Map([
+      [ 'up', () => Navigation.up() ],
+      [ 'cd', () => Navigation.cd(firstArg) ],
+      [ 'ls', async () => await Navigation.ls() ],
+      [ 'cat', async () => await FileOperations.cat(firstArg) ],
+      [ 'add', async () => await FileOperations.add(firstArg) ],
+      [ 'mkdir', async () => await FileOperations.mkdir(firstArg) ],
+      [ 'rn', async () => await FileOperations.rn(firstArg, secondArg) ],
+      [ 'cp', async () => await FileOperations.cp(firstArg, secondArg) ],
+      [ 'move', async () => await FileOperations.move(firstArg, secondArg) ],
+      [ 'rm', async () => await FileOperations.rm(firstArg) ],
+      [ 'os', () => OperatingSystem(firstArg) ],
+      [ 'hash', async () => await HashCalculation(firstArg) ],
+      [ 'compress', async () => await Archivation.compress(firstArg, secondArg) ],
+      [ 'decompress', async () => await Archivation.decompress(firstArg, secondArg) ],
+    ]);
 
-      case 'cd':
-        firstArg ? Navigation.cd(firstArg) : printInvalidInputMsg();
-        break;
+    const requiresArgs = new Map([
+      [ 'cd', [firstArg] ],
+      [ 'cat', [firstArg] ],
+      [ 'add', [firstArg] ],
+      [ 'mkdir', [firstArg] ],
+      [ 'rn', [firstArg, secondArg] ],
+      [ 'cp', [firstArg, secondArg] ],
+      [ 'move', [firstArg, secondArg] ],
+      [ 'rm', [firstArg] ],
+      [ 'os', [firstArg] ],
+      [ 'hash', [firstArg] ],
+      [ 'compress', [firstArg, secondArg] ],
+      [ 'decompress', [firstArg, secondArg] ],
+    ]);
+    
 
-      case 'ls':
-        await Navigation.ls();
-        break;
+    const handler = commandMap.get(command);
 
-      case 'cat':
-        firstArg ? FileOperations.cat(firstArg) : printInvalidInputMsg();
-        break;
+    if (!handler) {
+      printInvalidInputMsg();
 
-      case 'add':
-        firstArg ? FileOperations.add(firstArg) : printInvalidInputMsg();
-        break;
-      
-      case 'mkdir':
-        firstArg ? FileOperations.mkdir(firstArg) : printInvalidInputMsg();
-        break;
+      return;
+    }
 
-      case 'rn':
-        firstArg && secondArg ? FileOperations.rn(firstArg, secondArg) : printInvalidInputMsg();
-        break;
+    const args = requiresArgs.get(command);
+    const hasMissingArgs = args?.some(arg => !arg);
 
-      case 'cp':
-        firstArg && secondArg ? FileOperations.cp(firstArg, secondArg) : printInvalidInputMsg();
-        break;
-
-      case 'move':
-        firstArg && secondArg ? FileOperations.move(firstArg, secondArg) : printInvalidInputMsg();     
-        break;
-
-      case 'rm':
-        firstArg ? FileOperations.rm(firstArg) : printInvalidInputMsg();
-        break;
-
-      case 'os':
-        firstArg ? OperatingSystem(firstArg) : printInvalidInputMsg();
-        break;
-      
-      case 'hash':
-        firstArg ? HashCalculation(firstArg) : printInvalidInputMsg();
-        break;
-
-      case 'compress':
-        firstArg && secondArg ? Archivation.compress(firstArg, secondArg) : printInvalidInputMsg();
-        break;
-
-      case 'decompress':
-        firstArg && secondArg ? Archivation.decompress(firstArg, secondArg) : printInvalidInputMsg();
-        break;
-
-      default:
-        printInvalidInputMsg();
+    if (hasMissingArgs) {
+      printInvalidInputMsg();
+    } else {
+      await handler();
     }
 
   } catch {

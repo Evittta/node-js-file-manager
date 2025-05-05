@@ -28,10 +28,6 @@ const cp = async (pathToFile, pathToNewDirectory) => {
   const parsedPathToFile = path.isAbsolute(pathToFile) ? pathToFile : path.join(process.cwd(), pathToFile);
   const parsedPathToWriteFile = path.join(pathToNewDirectory, path.parse(pathToFile).base);
 
-  console.log(parsedPathToFile);
-  console.log(parsedPathToWriteFile);
-  
-
   const readableStream = createReadStream(parsedPathToFile);
   const writableStream = createWriteStream(parsedPathToWriteFile);
 
