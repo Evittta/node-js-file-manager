@@ -1,5 +1,5 @@
 import { createInterface } from 'readline';
-import Archivation from './helpers/archivation.js';
+import Archiving from './helpers/archiving.js';
 import Navigation from './helpers/navigation.js';
 import FileOperations from './helpers/file-operations.js';
 import { operatingSystem as OperatingSystem } from './helpers/operating-system.js';
@@ -40,8 +40,8 @@ rl.on('line', async line => {
       [ 'rm', async () => await FileOperations.rm(firstArg) ],
       [ 'os', () => OperatingSystem(firstArg) ],
       [ 'hash', async () => await HashCalculation(firstArg) ],
-      [ 'compress', async () => await Archivation.compress(firstArg, secondArg) ],
-      [ 'decompress', async () => await Archivation.decompress(firstArg, secondArg) ],
+      [ 'compress', async () => await Archiving.compress(firstArg, secondArg) ],
+      [ 'decompress', async () => await Archiving.decompress(firstArg, secondArg) ],
     ]);
 
     const requiresArgs = new Map([
